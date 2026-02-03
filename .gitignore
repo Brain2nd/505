@@ -1,0 +1,6 @@
+__pycache__/
+.DS_Store
+*.pyc
+.claude/
+hw0_submission.zip
+EXPERIMENT_LOG.md
