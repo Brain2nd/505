@@ -257,11 +257,11 @@ if __name__ == "__main__":
 
     # Load train / dev / test data
     print("Loading data...")
-    with open("../data/train.txt", "r", encoding="utf-8") as f:
+    with open("data/train.txt", "r", encoding="utf-8") as f:
         train_text = f.read()
-    with open("../data/dev.txt", "r", encoding="utf-8") as f:
+    with open("data/dev.txt", "r", encoding="utf-8") as f:
         dev_text = f.read()
-    with open("../data/test.txt", "r", encoding="utf-8") as f:
+    with open("data/test.txt", "r", encoding="utf-8") as f:
         test_text = f.read()
 
     # Tokenization (train ONLY)
