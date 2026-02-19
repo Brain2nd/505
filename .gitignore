@@ -1,0 +1,18 @@
+# Model checkpoints (too large)
+*.pt
+
+# Data
+pile/
+
+# GPT-2 model cache
+gpt2_shakespeare/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+
+# Converted Python file from Colab
+[cs505]_hw2.py
