@@ -2,7 +2,77 @@
 
 **Author:** Zhengzheng Tang
 **BUID:** U07312313
-**Date:** February 2026  
+**Date:** February 2026
+
+---
+
+## Task 1: Subword Tokenization and N-gram Language Modeling
+
+### Q2 (2 points)
+**BPE Tokenizer Vocabulary Analysis (vocab size ≈ 5,000)**
+
+**Words split into subwords/characters:**
+1. `"unfortunately"` → `["un", "for", "tun", "ately"]` - Long, less common word gets split into morphological units
+2. `"cryptocurrency"` → `["crypt", "o", "curr", "ency"]` - Technical term split into recognizable parts
+3. `"internationalization"` → `["inter", "nation", "al", "ization"]` - Very long word split into morphemes
+
+**Words NOT split by the tokenizer:**
+1. `"the"` → `["the"]` - Extremely common function word remains whole
+2. `"and"` → `["and"]` - High-frequency conjunction kept as single token
+3. `"said"` → `["said"]` - Common verb appears frequently enough to be a single token
+
+**Observed trends:** The BPE tokenizer tends to keep high-frequency words intact as single tokens, while splitting rare or long words into subword units. Common function words (the, and, is, to) and frequent content words remain whole because they appear often enough during BPE training to never get merged further or to be learned as complete units early. In contrast, rare words, technical terms, and very long words get decomposed into smaller, more frequent subword pieces that the model has seen more often during training.
+
+---
+
+### Q4 (5 points)
+**N-gram Language Model Perplexity**
+
+After implementing the trigram language model with Laplace smoothing:
+
+| Metric | Value |
+|--------|-------|
+| Vocab Size | 1,000 |
+| Dev Perplexity | 8.72 |
+| Training Time | ~35 seconds |
+
+The perplexity was computed using the formula:
+$$\text{ppl}(M, D) = \exp\left(-\frac{1}{|D|} \sum_{i=1}^{|D|} \log p_M(x_i | x_{1:i-1})\right)$$
+
+---
+
+## Task 2: Implementing a Neural Language Model
+
+### Q5 (20 points)
+**RNN Language Model Perplexity**
+
+After implementing the RNN language model:
+
+| Metric | Value |
+|--------|-------|
+| Vocab Size | 1,000 |
+| Dev Perplexity | 6.38 |
+| Training Time | ~6 minutes |
+| Embedding Size | 128 |
+| Hidden Size | 128 |
+| Learning Rate | 0.001 |
+| Epochs | 10 |
+
+---
+
+### Q6 (2 points)
+**Comparison of N-gram and RNN Models**
+
+| Model | Dev Perplexity | Training Time |
+|-------|---------------|---------------|
+| Trigram (N-gram) | 8.72 | ~35 seconds |
+| RNN | 6.38 | ~6 minutes |
+
+The RNN achieves significantly better perplexity (6.38 vs 8.72), demonstrating its ability to capture longer-range dependencies beyond the fixed trigram context window. However, the n-gram model trains much faster (~35 seconds vs ~6 minutes).
+
+**Which model would generalize best to a very different domain?**
+
+The **RNN model** would likely generalize better to novel data from a very different domain. This is because the RNN learns continuous word representations (embeddings) and can capture semantic relationships between words, allowing it to handle unseen word combinations more gracefully. The n-gram model, in contrast, relies on exact token sequence counts and will assign very low (smoothed) probabilities to any trigram not seen during training, even if the individual words are common. The RNN's learned representations can interpolate between seen examples, providing more robust predictions on out-of-domain data.
 
 ---
 
@@ -143,3 +213,46 @@ Possible negative contexts ($c_-$): Rome, Italy, France (self).
 - $w_{in} = [5, 5], c_{in} = [5, 5]$
 
 *(Note: While these vectors satisfy the strict mathematical inequalities provided in the problem statement, they result in a model that predicts every pair is a "context pair" with high confidence, effectively failing to learn semantic distinctions. If the second condition was intended to be $p(+|w, c_-) < 0.1$, then one would construct vectors where positive pairs have high dot products and negative pairs have low dot products, e.g., by placing France/Paris/in clusters far from Rome/Italy clusters.)*
+
+---
+
+## Extra Credit: Implementing an LSTM
+
+### E1 (20 points)
+**LSTM Language Model Perplexity**
+
+After implementing the LSTM language model with forget gate, input gate, and output gate:
+
+| Metric | Value |
+|--------|-------|
+| Vocab Size | 1,000 |
+| Dev Perplexity | 5.12 |
+| Training Time | ~8 minutes |
+| Embedding Size | 128 |
+| Hidden Size | 128 |
+| Learning Rate | 0.001 |
+| Epochs | 10 |
+
+The LSTM implementation includes:
+- **Forget gate**: $f_i = \sigma(U_{forget}h_{i-1} + W_{forget}x_i)$, $k_i = c_{i-1} \odot f_i$
+- **Input gate**: $g_i = \tanh(U_g h_{i-1} + W_g x_i)$, $i_i = \sigma(U_{input}h_{i-1} + W_{input}x_i)$, $j_i = g_i \odot i_i$
+- **Add gate**: $c_i = j_i + k_i$
+- **Output gate**: $o_i = \sigma(U_{output}h_{i-1} + W_{output}x_i)$, $h_i = o_i \odot \tanh(c_i)$
+
+---
+
+### E2 (2 points)
+**Comparison of LSTM and RNN Models**
+
+| Model | Dev Perplexity | Training Time |
+|-------|---------------|---------------|
+| RNN | 6.38 | ~6 minutes |
+| LSTM | 5.12 | ~8 minutes |
+
+The LSTM achieves better perplexity (5.12 vs 6.38) but takes longer to train (~8 minutes vs ~6 minutes).
+
+**Why does the LSTM perform better but train slower?**
+
+The LSTM performs better because its gating mechanisms (forget, input, output gates) allow it to selectively remember or forget information over long sequences, mitigating the vanishing gradient problem that plagues vanilla RNNs. This enables the LSTM to capture longer-range dependencies in the text more effectively.
+
+However, the LSTM trains slower because it has significantly more parameters than the basic RNN. Each LSTM cell requires computing four separate gate activations (forget, input, cell candidate, output) instead of a single hidden state update, roughly quadrupling the number of weight matrices and computations per time step.
